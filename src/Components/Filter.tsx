@@ -3,6 +3,7 @@ import React, { useState } from "react";
 interface FilterProps {
   updateParentState(filter: string): any;
 }
+
 const Filter: React.FC<FilterProps> = ({ updateParentState }) => {
   const [Title, setTitle] = useState<string>("");
 
@@ -19,13 +20,50 @@ const Filter: React.FC<FilterProps> = ({ updateParentState }) => {
 
   return (
     <>
-      <div style={{ display: "block", margin: "5px" }}>
-        <span>filter reported bike thefts by partial case titles</span>
-        <div>
-          <input type="text" value={Title} onChange={handleInputChange} />
-          <p>Input Value: {Title}</p>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#f1f1f1",
+          padding: "20px",
+          borderRadius: "10px",
+          boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        }}
+      >
+        <h2
+          style={{ fontSize: "20px", fontWeight: "bold", marginBottom: "20px" }}
+        >
+          Filter reported bike thefts
+        </h2>
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <input
+            type="text"
+            value={Title}
+            placeholder="Enter partial title"
+            onChange={handleInputChange}
+            style={{
+              padding: "10px",
+              borderRadius: "5px",
+              marginRight: "10px",
+            }}
+          />
+          <button
+            onClick={handleClick}
+            style={{
+              padding: "10px",
+              fontSize: "16px",
+              backgroundColor: "#007bff",
+              color: "#fff",
+              borderRadius: "5px",
+              cursor: "pointer",
+            }}
+          >
+            Search
+          </button>
         </div>
-        <button onClick={handleClick}>search</button>{" "}
+        <p style={{ fontSize: "14px", marginTop: "10px" }}></p>
       </div>
     </>
   );

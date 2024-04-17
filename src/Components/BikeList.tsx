@@ -32,25 +32,24 @@ export interface Bike {
 const BikeList: React.FC = () => {
   const [apiResponse, setApiResponse] = useState<Bike[] | []>([]);
   const [count, setCount] = React.useState<number>(0);
-  const [CurrentPage, setCurrentPage] = useState<number>(1);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   const [loading, setLoading] = useState(true);
-  const [TitleFilter, setTitleFilter] = useState<string>("");
-  const [OnlyMunich, setOnlyMunich] = useState<boolean>(false);
+  const [titleFilter, setTitleFilter] = useState<string>("");
+  const [onlyMunich, setOnlyMunich] = useState<boolean>(false);
 
   const getCount = async () => {
     try {
-      let endpoint = OnlyMunich
-        ? `https://bikeindex.org:443/api/v3/search/count?location=munich&stolenness=proximity&query=${TitleFilter}`
-        : `https://bikeindex.org:443/api/v3/search/count?query=${TitleFilter}`;
+      let endpoint = onlyMunich
+        ? `https://bikeindex.org:443/api/v3/search/count?location=munich&stolenness=proximity&query=${titleFilter}`
+        : `https://bikeindex.org:443/api/v3/search/count?query=${titleFilter}`;
 
       const response = await fetch(endpoint);
       if (response.ok) {
         const apiresponse = await response.json();
-        OnlyMunich
-          ? setCount(apiresponse.proximity)
-          : setCount(apiresponse.stolen);
-
-        console.log("apiresponse , count", apiresponse, count);
+        const totalCount = onlyMunich
+          ? apiresponse.proximity
+          : apiresponse.stolen;
+        setCount(totalCount);
       } else {
         console.error("Failed to fetch data");
       }
@@ -63,15 +62,17 @@ const BikeList: React.FC = () => {
     try {
       setLoading(true);
 
-      let endpoint = OnlyMunich
-        ? `https://bikeindex.org:443/api/v3/search?page=${page}&query=${TitleFilter}&per_page=10&location=munich&stolenness=proximity`
-        : `https://bikeindex.org:443/api/v3/search?page=${page}&query=${TitleFilter}&per_page=10`;
+      let endpoint = onlyMunich
+        ? `https://bikeindex.org:443/api/v3/search?page=${page}&query=${titleFilter}&per_page=10&location=munich&stolenness=proximity`
+        : `https://bikeindex.org:443/api/v3/search?page=${page}&query=${titleFilter}&per_page=10`;
 
       const response = await fetch(endpoint);
       if (response.ok) {
         const apiresponse = await response.json();
         const bikes: Bike[] = apiresponse.bikes;
         setApiResponse(bikes);
+        console.log("setApiResponse(bikes)", apiResponse);
+
         setLoading(false);
       } else {
         console.error("Failed to fetch data");
@@ -88,37 +89,46 @@ const BikeList: React.FC = () => {
   const updateFilterState = (newFilter: string) => {
     setTitleFilter(newFilter);
   };
-  const handleClick = () => {
-    setOnlyMunich(!OnlyMunich);
-  };
 
-  let buttonText = OnlyMunich ? "all cases" : "only munich cases";
+  const handleClick = () => {
+    setOnlyMunich(!onlyMunich);
+    setCurrentPage(1);
+  };
 
   useEffect(() => {
     getCount();
-    fetchData(CurrentPage);
-  }, [TitleFilter, OnlyMunich]);
+    fetchData(currentPage);
+  }, [titleFilter, onlyMunich]);
+
   useEffect(() => {
-    fetchData(CurrentPage);
-  }, [CurrentPage]);
+    fetchData(currentPage);
+  }, [currentPage]);
 
   return (
-    <>
-      <Filter updateParentState={updateFilterState} />
-      <button onClick={handleClick}>{buttonText}</button>{" "}
-      <h1>current page is {CurrentPage}</h1>
-      <h1>the total number of bike theft cases is {count}</h1>
-      {loading ? <LoadingBar /> : null}
-      {apiResponse.map((bike) => (
-        <BikeCard key={bike.id} bike={bike} />
-      ))}
-      {loading ? <LoadingBar /> : null}
-      <PaginationBar
-        count={count}
-        perpage={10}
-        updateParentState={updateCurrentPageState}
-      />
-    </>
+    <div style={{ display: "flex", justifyContent: "center" }}>
+      <span style={{ width: "80%" }}>
+        <Filter updateParentState={updateFilterState} />
+        <button
+          onClick={handleClick}
+          style={{ margin: "20px 0", background: "black", color: "white" }}
+        >
+          {onlyMunich ? "View All Cases" : "View Only Munich Cases"}
+        </button>
+        <h1>Total number of bike theft cases: {count}</h1>
+        {loading && <LoadingBar />}
+        {apiResponse.map((bike) => (
+          <BikeCard key={bike.id} bike={bike} />
+        ))}
+        {loading && <LoadingBar />}
+        <div style={{ display: "flex", justifyContent: "center" }}>
+          <PaginationBar
+            count={count}
+            perpage={10}
+            updateParentState={updateCurrentPageState}
+          />
+        </div>
+      </span>
+    </div>
   );
 };
 
