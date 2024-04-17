@@ -15,13 +15,18 @@ const PaginationBar: React.FC<PaginationProps> = ({
 }) => {
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
     updateParentState(value);
+    console.log(event);
   };
   const totalPages = Math.ceil(count / perpage);
 
   return (
     <>
       <Stack spacing={20}>
-        <Pagination count={5} variant="outlined" onChange={handleChange} />
+        <Pagination
+          count={totalPages}
+          variant="outlined"
+          onChange={handleChange}
+        />
       </Stack>
     </>
   );
